@@ -16,3 +16,15 @@ curl -X POST http://localhost:3000 \
 ```
 node v20.12.2
 ```
+
+```
+pm2 start ecosystem.config.cjs
+```
+
+```
+/etc/caddy
+```
+
+```
+sudo systemctl restart caddy
+```
