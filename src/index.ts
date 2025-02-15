@@ -14,6 +14,23 @@ app.use('*', async (c, next) => {
     try {
       const rawBody = await c.req.text()
       console.log(`Body:`, rawBody)
+
+      const url = c.req.url
+      const query = c.req.query()
+      const contentType = c.req.header('content-type') || 'unknown'
+
+      console.log(`Received request: URL=${url}, Query=${JSON.stringify(query)}, Content-Type=${contentType}`)
+      console.log('Raw Body:', rawBody)
+
+      await prisma.requestLog.create({
+        data: {
+          'payload': {
+            'queryParams': query,
+            'headers': { contentType },
+            'payload': rawBody
+          }
+        }
+      })
     } catch (error) {
       console.log(`Body: (could not read)`)
     }
@@ -33,47 +50,19 @@ app.get('/', async (c) => {
 })
 
 app.post('/', async (c) => {
-  const url = c.req.url
-  const query = c.req.query()
-  const contentType = c.req.header('content-type') || 'unknown'
-  const rawBody = await c.req.text()
-
-  console.log(`Received request: URL=${url}, Query=${JSON.stringify(query)}, Content-Type=${contentType}`)
-  console.log('Raw Body:', rawBody)
-
-  await prisma.requestLog.create({
-    data: {
-      'payload': {
-        'queryParams': query,
-        'headers': { contentType },
-        'payload': rawBody
-      }
-    }
-  })
-
   return c.text('Done!')
 })
 
+// Handle GET requests to /iclock/cdata
+app.get('/iclock/cdata', async (c) => {
+  console.log('Received GET request to /iclock/cdata')
+  return c.text('OK')
+})
+
+// Handle POST requests to /iclock/cdata
 app.post('/iclock/cdata', async (c) => {
-  const url = c.req.url
-  const query = c.req.query()
-  const contentType = c.req.header('content-type') || 'unknown'
-  const rawBody = await c.req.text()
-
-  console.log(`Received request: URL=${url}, Query=${JSON.stringify(query)}, Content-Type=${contentType}`)
-  console.log('Raw Body:', rawBody)
-
-  await prisma.requestLog.create({
-    data: {
-      'payload': {
-        'queryParams': query,
-        'headers': { contentType },
-        'payload': rawBody
-      }
-    }
-  })
-
-  return c.text('Done!')
+  console.log('Received POST request to /iclock/cdata')
+  return c.text('OK')
 })
 
 const port = 3000
