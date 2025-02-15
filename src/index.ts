@@ -28,11 +28,21 @@ app.post('/', async (c) => {
 })
 
 app.post('/iclock/cdata', async (c) => {
-  const body = await c.req.json()
+  const url = c.req.url
+  const query = c.req.query()
+  const contentType = c.req.header('content-type') || 'unknown'
+  const rawBody = await c.req.text()
+
+  console.log(`Received request: URL=${url}, Query=${JSON.stringify(query)}, Content-Type=${contentType}`)
+  console.log('Raw Body:', rawBody)
 
   await prisma.requestLog.create({
     data: {
-      'payload': body
+      'payload': {
+        'queryParams': query,
+        'headers': { contentType },
+        'payload': rawBody
+      }
     }
   })
 
