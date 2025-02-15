@@ -27,6 +27,18 @@ app.post('/', async (c) => {
   return c.text('Done!')
 })
 
+app.post('/iclock/cdata', async (c) => {
+  const body = await c.req.json()
+
+  await prisma.requestLog.create({
+    data: {
+      'payload': body
+    }
+  })
+
+  return c.text('Done!')
+})
+
 const port = 3000
 console.log(`Server is running on http://localhost:${port}`)
 
