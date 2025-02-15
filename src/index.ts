@@ -5,6 +5,23 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 const app = new Hono()
 
+app.use('*', async (c, next) => {
+  console.log(`[${new Date().toISOString()}] ${c.req.method} ${c.req.url}`)
+  console.log(`Headers:`, c.req.header())
+
+  // Try to log request body if possible
+  if (c.req.method !== 'GET') {
+    try {
+      const rawBody = await c.req.text()
+      console.log(`Body:`, rawBody)
+    } catch (error) {
+      console.log(`Body: (could not read)`)
+    }
+  }
+
+  await next()
+})
+
 app.get('/', async (c) => {
   const data = await prisma.requestLog.findMany({
     orderBy: {
@@ -16,11 +33,21 @@ app.get('/', async (c) => {
 })
 
 app.post('/', async (c) => {
-  const body = await c.req.json()
+  const url = c.req.url
+  const query = c.req.query()
+  const contentType = c.req.header('content-type') || 'unknown'
+  const rawBody = await c.req.text()
+
+  console.log(`Received request: URL=${url}, Query=${JSON.stringify(query)}, Content-Type=${contentType}`)
+  console.log('Raw Body:', rawBody)
 
   await prisma.requestLog.create({
     data: {
-      'payload': body
+      'payload': {
+        'queryParams': query,
+        'headers': { contentType },
+        'payload': rawBody
+      }
     }
   })
 
